@@ -5,12 +5,39 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#FEFDED"
     tools:context=".MainActivity">
 
-    <TextView
+    <Button
+        android:id="@+id/session_start_bt"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!"
+        android:backgroundTint="#FA7070"
+        android:text="Start your session"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/session_completed_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Session Completed"
+        android:textSize="20sp"
+        android:layout_marginTop="20dp"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="@+id/session_start_bt"
+        app:layout_constraintStart_toStartOf="@+id/session_start_bt"
+        app:layout_constraintTop_toBottomOf="@+id/session_start_bt" />
+
+    <TextView
+        android:id="@+id/motivation_quote_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Motivation Quotes!"
+        android:textSize="30sp"
+        android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
