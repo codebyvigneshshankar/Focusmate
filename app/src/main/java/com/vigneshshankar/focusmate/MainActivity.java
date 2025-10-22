@@ -18,8 +18,15 @@ public class MainActivity extends AppCompatActivity {
     private Boolean isStudyPhase = true;
     private Boolean isTimerRunning = false;
     private Button sessionStartBtn;
+
+    private Button resetBtn;
     private TextView sessionCompletedTv;
     private TextView motivationalQuoteTv;
+
+    private long timeLeftInMillis;
+    private long currentDuration;
+
+    private CountDownTimer countDownTimer;
 
     private final String[] quotes = {
             "Believe you can and you're halfway there.",
@@ -50,76 +57,105 @@ public class MainActivity extends AppCompatActivity {
         sessionCompletedTv = findViewById(R.id.session_completed_tv);
         motivationalQuoteTv = findViewById(R.id.motivation_quote_tv);
 
+        resetBtn = findViewById(R.id.reset_btn);
+
         sessionCompletedTv.setVisibility(View.GONE);
 
         sessionStartBtn.setOnClickListener(v -> {
-            if(isTimerRunning){
-                return;
-            }
-
-            isTimerRunning = true;
-
-            if(isStudyPhase){
-                sessionStartBtn.setText("Starting Studying");
-                startTimer(STUDY_DURATION);
-                sessionStartBtn.setClickable(false);
+            if(!isTimerRunning){
+                if(timeLeftInMillis == 0){
+                    currentDuration = isStudyPhase ? STUDY_DURATION : BREAK_DURATION;
+                    timeLeftInMillis = currentDuration;
+                }
+                startTimer();
             }else{
-                sessionStartBtn.setText("Have a Snack");
-                startTimer(BREAK_DURATION);
-                sessionStartBtn.setClickable(false);
+                pauseTimer();
             }
-
         });
+
+        resetBtn.setOnClickListener(view -> resetTimer());
     }
 
-    private void startTimer(long durationMillis){
-        CountDownTimer countDownTimer = new CountDownTimer(durationMillis, 1000) {
+    private void startTimer() {
+        countDownTimer = new CountDownTimer(timeLeftInMillis, 1000) {
             @Override
-            public void onTick(long l) {
-                sessionStartBtn.setText(formatTime(l));
+            public void onTick(long millisUntilFinished) {
+                timeLeftInMillis = millisUntilFinished;
+                sessionStartBtn.setText(formatTime(timeLeftInMillis));
             }
+
             @Override
             public void onFinish() {
-                if(isStudyPhase){
+                isTimerRunning = false;
+                timeLeftInMillis = 0;
+
+                if (isStudyPhase) {
                     isStudyPhase = false;
-                    sessionStartBtn.setText("Starting Break...");
-                }else{
+                    sessionStartBtn.setText("Break Time!");
+                } else {
                     isStudyPhase = true;
                     sessionCounter++;
 
+                    resetBtn.setVisibility(View.GONE);
                     sessionStartBtn.setVisibility(View.GONE);
-                    sessionCompletedTv.setVisibility(View.GONE);
 
-                    int randomIndex = (int) Math.random() * quotes.length;
+                    int randomIndex = (int) (Math.random() * quotes.length);
                     motivationalQuoteTv.setText(quotes[randomIndex]);
                     motivationalQuoteTv.setVisibility(View.VISIBLE);
+                    sessionCompletedTv.setVisibility(View.GONE);
+
+
 
                     new CountDownTimer(5000, 1000){
-                        @Override
-                        public void onTick(long l) {
-                        }
 
                         @Override
                         public void onFinish() {
                             motivationalQuoteTv.setVisibility(View.GONE);
 
-                            sessionCompletedTv.setText("Congratulations! Session " + sessionCounter + " Completed");
+                            sessionCompletedTv.setText("Session's Completed: " + sessionCounter + " 🎉");
                             sessionCompletedTv.setVisibility(View.VISIBLE);
 
-                            sessionStartBtn.setText("Start Next Session?");
+                            sessionStartBtn.setText("Start New Session?");
                             sessionStartBtn.setVisibility(View.VISIBLE);
+                            resetBtn.setVisibility(View.VISIBLE);
+
+                        }
+
+                        @Override
+                        public void onTick(long l) {
+
                         }
                     }.start();
+
+
                 }
-                isTimerRunning = false;
-                sessionStartBtn.setClickable(true);
             }
+        }.start();
 
-
-        };
-        countDownTimer.start();
+        isTimerRunning = true;
+        sessionStartBtn.setText("Pause");
     }
 
+    private void pauseTimer(){
+        countDownTimer.cancel();
+        isTimerRunning = false;
+        sessionStartBtn.setText("Resume");
+    }
+
+    private void resetTimer(){
+        if(countDownTimer != null){
+            countDownTimer.cancel();
+        }
+
+        sessionCounter = 0;
+        isTimerRunning = false;
+        timeLeftInMillis = 0;
+        isStudyPhase = true;
+
+        sessionStartBtn.setText("Start Studying");
+        motivationalQuoteTv.setVisibility(View.GONE);
+        sessionCompletedTv.setVisibility(View.GONE);
+    }
     private String formatTime(long millis){
         long totalSeconds = millis / 1000;
         long hours = totalSeconds / 3600;
